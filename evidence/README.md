@@ -1,8 +1,8 @@
 # Evidence Publication Instructions
 
-[Evidence index and proposed filenames](../docs/EVIDENCE_INDEX.md) · [Overview](../README.md)
+[Evidence index and published filenames](../docs/EVIDENCE_INDEX.md) · [Overview](../README.md)
 
-This directory is a placeholder for **actual, sanitized lab evidence**. No screenshots have been fabricated or included. The filenames in the index are proposals, not claims that artifacts exist.
+This directory contains 31 actual screenshots and 10 reviewed text exports. Nine images are cropped or redacted copies; the remaining 22 are unchanged. Originals remain outside the repository. No screenshot was generated or reconstructed. See the evidence index for each file, its context, and publication treatment. Sensitive raw event logs remain excluded.
 
 ## Before adding evidence
 

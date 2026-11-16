@@ -1,0 +1,23 @@
+Firewall Assessment - 11/15/2026 10:52:08
+
+
+Name                  : Domain
+Enabled               : True
+DefaultInboundAction  : Block
+DefaultOutboundAction : Allow
+LogAllowed            : False
+LogBlocked            : True
+
+Name                  : Private
+Enabled               : True
+DefaultInboundAction  : Block
+DefaultOutboundAction : Allow
+LogAllowed            : False
+LogBlocked            : True
+
+Name                  : Public
+Enabled               : True
+DefaultInboundAction  : Block
+DefaultOutboundAction : Allow
+LogAllowed            : False
+LogBlocked            : True

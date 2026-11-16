@@ -1,0 +1,5 @@
+MountPoint           : C:
+VolumeStatus         : FullyEncrypted
+ProtectionStatus     : On
+EncryptionPercentage : 100
+EncryptionMethod     : XtsAes128

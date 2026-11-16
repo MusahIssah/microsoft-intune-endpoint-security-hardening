@@ -8,7 +8,7 @@ This personal lab documents endpoint configuration, compliance validation, and r
 
 The project distinguishes successful policy deployment, independent local verification, and compliance evaluation. All six evaluated compliance controls reported Compliant, while recovery-key visibility and ASR audit review remained unresolved. Compliance status does not resolve every operational risk.
 
-Results are the author's supplied lab observations. Repository validation checks documentation and script syntax; it does not repeat endpoint testing. No screenshots or raw telemetry are published at this stage.
+Results are the author's supplied lab observations. Repository validation checks documentation and script syntax; it does not repeat endpoint testing. Reviewed screenshots and selected text exports are displayed inline below and in the implementation guide. Identifier-bearing images were cropped or redacted on copies; sensitive raw event logs are excluded.
 
 ## Business scenario
 
@@ -91,6 +91,249 @@ The vulnerable signed driver rule, `56a863a9-875e-4185-98a7-b882c64b5ce5`, was t
 
 Ten recorded Event ID **1122** events involved the LSASS credential protection rule, `9E6C4E1F-7D60-472F-BA1A-A39EF669E4B2`, and `svchost.exe` / `lsass.exe`. This is **audit telemetry, not proof of compromise**. No observation window or complete event corpus is supplied; the count is not a claim about all events on the endpoint.
 
+## Evidence walkthrough
+
+The evidence appears alongside the corresponding result. Expanded policy screenshots and complete reviewed text exports appear under each matching procedure in [Implementation](docs/IMPLEMENTATION.md). These are historical lab artifacts, not output from the newly authored collector.
+
+### 1. Enrollment and sync recovery
+
+Local identity status reports `AzureAdJoined : NO`. The failed sync and subsequent success are shown in order; after connectivity restoration, the portal check-in updated.
+
+*Sync failure 0x80072ee7 before connectivity restoration*
+
+![Sync failure 0x80072ee7 before connectivity restoration](evidence/04_MDM_Synchronization_Status.png)
+
+*Successful sync on November 15, 2026 at 9:46:23 AM*
+
+![Successful sync on November 15, 2026 at 9:46:23 AM](evidence/04_MDM_Synchronization_Success.png)
+
+*Intune check-in updated to November 15, 2026 at 9:46 AM*
+
+![Intune check-in updated to November 15, 2026 at 9:46 AM](evidence/05_Intune_Device_CheckIn_Confirmed.png)
+
+### 2. BitLocker and recovery visibility
+
+Encryption and protector types are verified separately from recovery-key availability. No recovery password is included.
+
+**Recorded output — [06_BitLocker_Encryption_Status.txt](evidence/06_BitLocker_Encryption_Status.txt):**
+
+```text
+MountPoint           : C:
+VolumeStatus         : FullyEncrypted
+ProtectionStatus     : On
+EncryptionPercentage : 100
+EncryptionMethod     : XtsAes128
+```
+
+**Recorded output — [07_BitLocker_Protector_Types.txt](evidence/07_BitLocker_Protector_Types.txt):**
+
+```text
+KeyProtectorType
+----------------
+RecoveryPassword
+             Tpm
+```
+
+*Portal reports no BitLocker recovery key found for the reviewed device*
+
+![Portal reports no BitLocker recovery key found for the reviewed device](evidence/09_Entra_BitLocker_Key_Not_Found.png)
+
+**BL-01 remains OPEN.** The portal observation does not prove that recovery material is absent everywhere.
+
+### 3. Firewall deployment and local verification
+
+*Intune firewall policy reports one successful device*
+
+![Intune firewall policy reports one successful device](evidence/11_Intune_Firewall_Policy_Status.png)
+
+**Recorded output — [10_Defender_Firewall_Status.txt](evidence/10_Defender_Firewall_Status.txt):**
+
+```text
+Firewall Assessment - 11/15/2026 10:52:08
+
+
+Name                  : Domain
+Enabled               : True
+DefaultInboundAction  : Block
+DefaultOutboundAction : Allow
+LogAllowed            : False
+LogBlocked            : True
+
+Name                  : Private
+Enabled               : True
+DefaultInboundAction  : Block
+DefaultOutboundAction : Allow
+LogAllowed            : False
+LogBlocked            : True
+
+Name                  : Public
+Enabled               : True
+DefaultInboundAction  : Block
+DefaultOutboundAction : Allow
+LogAllowed            : False
+LogBlocked            : True
+```
+
+### 4. Local administrator review
+
+Built-in Administrator was disabled. BTLabAdmin belonged to Administrators and initially had PasswordRequired False. The local remediation changed that property to True; centralized group policy was not deployed.
+
+*Historical local BTLabAdmin Password required No*
+
+![Historical local BTLabAdmin Password required No](evidence/15_Local_Admin_Password_Requirement_Before.png)
+
+**Recorded output — [14_Local_Admin_Account_Status.txt](evidence/14_Local_Admin_Account_Status.txt):**
+
+```text
+Name          Enabled PasswordRequired PasswordLastSet
+----          ------- ---------------- ---------------
+Administrator   False             True
+BTLabAdmin       True            False 11/9/2026 5:45:21 PM
+```
+
+**Recorded output — [16_Local_Admin_Password_Requirement_After.txt](evidence/16_Local_Admin_Password_Requirement_After.txt):**
+
+```text
+User name                    BTLabAdmin
+Full Name
+Comment
+User's comment
+Country/region code          000 (System Default)
+Account active               Yes
+Account expires              Never
+
+Password last set            11/9/2026 5:45:21 PM
+Password expires             Never
+Password changeable          11/9/2026 5:45:21 PM
+Password required            Yes
+User may change password     Yes
+
+Workstations allowed         All
+Logon script
+User profile
+Home directory
+Last logon                   11/15/2026 9:32:56 AM
+
+Logon hours allowed          All
+
+Local Group Memberships      *Administrators
+Global Group memberships     *None
+The command completed successfully.
+```
+
+*Draft administrator group selection during compatibility review*
+
+![Draft administrator group selection during compatibility review](evidence/20_Local_Admin_Policy_Compatibility_Review.png)
+
+*The policy wizard is a draft under compatibility review, not proof of Intune deployment.*
+
+### 5. Compliance and independent platform verification
+
+*All six evaluated controls reported Compliant*
+
+![All six evaluated controls reported Compliant](evidence/26_Intune_Device_Compliance_Results.png)
+
+**Recorded output — [25_Device_Security_Compliance_Verification.txt](evidence/25_Device_Security_Compliance_Verification.txt):**
+
+```text
+Device Security Verification - 11/15/2026 14:09:04
+=== SECURE BOOT ===
+True
+
+=== TPM ===
+
+
+TpmPresent   : True
+TpmReady     : True
+TpmEnabled   : True
+TpmActivated : True
+
+
+
+
+=== MICROSOFT DEFENDER ===
+
+
+AMServiceEnabled              : True
+AntivirusEnabled              : True
+AntispywareEnabled            : True
+RealTimeProtectionEnabled     : True
+AntivirusSignatureLastUpdated : 11/13/2026 5:47:57 AM
+```
+
+### 6. Defender Antivirus
+
+*Intune AV policy reports one successful device*
+
+![Intune AV policy reports one successful device](evidence/28_Defender_AV_Policy_Deployment.png)
+
+**Recorded output — [30_Defender_AV_Configuration_Verification.txt](evidence/30_Defender_AV_Configuration_Verification.txt):**
+
+```text
+Defender Antivirus Verification - 11/15/2026 14:39:18
+
+
+MAPSReporting             : 1
+CloudBlockLevel           : 2
+SubmitSamplesConsent      : 1
+PUAProtection             : 1
+DisableRealtimeMonitoring : False
+DisableBehaviorMonitoring : False
+DisableScriptScanning     : False
+DisableArchiveScanning    : False
+DisableIOAVProtection     : False
+EnableNetworkProtection   : 0
+```
+
+### 7. ASR configuration and audit review
+
+*Intune ASR policy reports one successful device*
+
+![Intune ASR policy reports one successful device](evidence/31_Defender_ASR_Policy_Deployment.png)
+
+*Vulnerable signed drivers Block; Adobe Reader child processes Audit*
+
+![Vulnerable signed drivers Block; Adobe Reader child processes Audit](evidence/35_ASR_Vulnerable_Drivers_Block.png)
+
+*LSASS credential protection shown in Audit mode*
+
+![LSASS credential protection shown in Audit mode](evidence/36_ASR_LSASS_Audit.png)
+
+*Controlled Folder Access selected as Audit Mode*
+
+![Controlled Folder Access selected as Audit Mode](evidence/42_Controlled_Folder_Access_Audit.png)
+
+**Recorded output — [33_Defender_ASR_Configuration_Verification.txt](evidence/33_Defender_ASR_Configuration_Verification.txt):**
+
+```text
+ASR Verification - 11/15/2026 15:02:36
+01443614-cd74-433a-b99e-2ecdc07bfc25 : 2
+26190899-1602-49e8-8b27-eb1d0a1ce869 : 2
+33ddedf1-c6e0-47cb-833e-de6133960387 : 2
+3B576869-A4EC-4529-8536-B80A7769E899 : 2
+56a863a9-875e-4185-98a7-b882c64b5ce5 : 1
+5BEB7EFE-FD9A-4556-801D-275E5FFC04CC : 2
+75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84 : 2
+7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c : 2
+92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B : 2
+9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2 : 2
+b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4 : 2
+BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550 : 2
+c0033c00-d16d-4114-a5a0-dc9b3a7d2ceb : 2
+c1db55ab-c21a-4637-bb3f-a12568109d35 : 2
+d1e49aac-8f56-4280-b9ba-993a6d77406c : 2
+D3E037E1-3EB8-44C8-A917-57927947596D : 2
+D4F940AB-401B-4EFC-AADC-AD5F3C50688A : 2
+e6db77e5-3df2-4cf1-b95a-636979351e5b : 2
+Controlled Folder Access: 2
+```
+
+*Ten returned audit events; query was limited to the latest ten matches*
+
+![Ten returned audit events; query was limited to the latest ten matches](evidence/34_Defender_ASR_Audit_Events.png)
+
+The screenshot query was limited to ten matching events. It does not establish the total number of events or a monitoring window. **ASR-01 remains Under Review**; audit telemetry is not proof of compromise. The sensitive raw event export is not published.
+
 ## Security findings
 
 | ID | Status | Observation | Next step |
@@ -142,11 +385,11 @@ These mappings provide context only, not complete control implementation or a cl
 | [Architecture](docs/ARCHITECTURE.md) | Trust boundaries and enrollment limitations |
 | [Implementation](docs/IMPLEMENTATION.md) | Recorded configuration and validation procedures |
 | [Security findings](docs/SECURITY_FINDINGS.md) | BL-01 and ASR-01 |
-| [Evidence index](docs/EVIDENCE_INDEX.md) | Proposed filenames and screenshot locations |
+| [Evidence index](docs/EVIDENCE_INDEX.md) | Published filenames, descriptions, and screenshot treatment |
 | [Remediation tracker](remediation/README.md) | Status and closure requirements |
 | [Evidence instructions](evidence/README.md) | Sanitization and publication requirements |
 
-Evidence filenames are placeholders, not claims that images exist. Actual images can be added after sanitization; no screenshots have been fabricated.
+The evidence index lists the actual published files. Images are original lab captures, with cropping or solid redaction where needed; no screenshots were generated or reconstructed.
 
 ## Technical references
 

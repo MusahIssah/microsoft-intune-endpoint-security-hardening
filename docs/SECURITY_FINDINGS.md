@@ -2,7 +2,7 @@
 
 [Overview](../README.md) · [Remediation tracker](../remediation/README.md) · [Evidence index](EVIDENCE_INDEX.md)
 
-These findings reflect the author's supplied lab observations. Sanitized source artifacts have not yet been published. No severity score, incident attribution, or remediation completion is inferred.
+These findings reflect the author's supplied lab observations. Reviewed source artifacts are now published in the evidence index; sensitive raw event logs remain private. No severity score, incident attribution, or remediation completion is inferred.
 
 ## BL-01 — Recovery-key visibility
 
@@ -12,10 +12,14 @@ These findings reflect the author's supplied lab observations. Sanitized source 
 | --- | --- |
 | Observation | No BitLocker recovery key was found in the Entra portal during review |
 | Corroborating local state | C: FullyEncrypted, 100%, Protection On, XtsAes128; TPM and RecoveryPassword protector types present |
-| Evidence reference | Proposed E03 and E04 in the evidence index; not yet uploaded |
+| Evidence reference | [BitLocker state](../evidence/06_BitLocker_Encryption_Status.txt), [protector types](../evidence/07_BitLocker_Protector_Types.txt), and cropped portal image below |
 | Impact | An unverified recovery path could delay or prevent authorized access if recovery is required |
 | Scope limit | The portal observation does **not** establish that recovery material is absent everywhere, that a protector is missing, or that encryption failed |
 | Context | MDM-only enrollment; not Entra joined; no root cause established |
+
+*Portal observation supporting BL-01; not proof of absence everywhere*
+
+![Portal observation supporting BL-01; not proof of absence everywhere](../evidence/09_Entra_BitLocker_Key_Not_Found.png)
 
 ### Recommended remediation
 
@@ -45,11 +49,19 @@ Until these criteria are evidenced, retain **OPEN**. A new successful compliance
 | Rule | LSASS credential protection, `9E6C4E1F-7D60-472F-BA1A-A39EF669E4B2` |
 | Configuration context | 18 ASR rules: 1 Block, 17 Audit; Controlled Folder Access Audit; Intune ASR deployment succeeded |
 | Block rule | Vulnerable signed drivers, `56a863a9-875e-4185-98a7-b882c64b5ce5` |
-| Evidence reference | Proposed E10 and E11; not yet uploaded |
+| Evidence reference | [ASR settings](../evidence/33_Defender_ASR_Configuration_Verification.txt), policy screenshots, and cropped event sample below; raw event messages excluded |
 | Impact | Audit-mode coverage provides visibility but does not demonstrate prevention; enforcement changes may also affect legitimate workflows |
 | Evidence limit | No observation window, full event corpus, process validation, or incident investigation supplied |
 
 The events are **audit telemetry, not proof of compromise**. No malicious LSASS access, credential theft, or blocked attack is asserted. Microsoft identifies Event ID 1122 as an [ASR audit event](https://learn.microsoft.com/en-us/defender-endpoint/attack-surface-reduction-windows-events).
+
+*LSASS protection configured in Audit mode*
+
+![LSASS protection configured in Audit mode](../evidence/36_ASR_LSASS_Audit.png)
+
+*Ten returned ASR audit events; query capped at ten, not a total count*
+
+![Ten returned ASR audit events; query capped at ten, not a total count](../evidence/34_Defender_ASR_Audit_Events.png)
 
 ### Recommended remediation and review
 

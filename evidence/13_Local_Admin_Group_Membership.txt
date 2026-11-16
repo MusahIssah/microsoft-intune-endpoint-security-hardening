@@ -1,0 +1,4 @@
+Name                      ObjectClass PrincipalSource
+----                      ----------- ---------------
+BT-WIN11-01\Administrator User                  Local
+BT-WIN11-01\BTLabAdmin    User                  Local
